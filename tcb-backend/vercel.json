@@ -1,18 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "prisma/src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["prisma/**"]
-      }
+  "buildCommand": "cd tcb-backend && prisma generate --schema=tcb-backend/prisma/schema.prisma && tsc",
+  "outputDirectory": "tcb-backend/dist",
+  "functions": {
+    "tcb-backend/prisma/src/index.ts": {
+      "runtime": "nodejs20.x"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "prisma/src/index.ts"
+      "dest": "tcb-backend/prisma/src/index.ts"
     }
   ]
 }

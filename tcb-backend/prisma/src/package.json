@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch prisma/src/index.ts",
     "build": "tsc",
-    "vercel-build": "prisma generate --schema=prisma/schema.prisma && tsc",
+   "vercel-build": "prisma generate --schema=./prisma/schema.prisma && tsc",
     "start": "node dist/prisma/src/index.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
