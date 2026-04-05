@@ -19,6 +19,9 @@
     "load-test": "node scripts/load-test.mjs",
     "load-test:heavy": "node scripts/load-test.mjs 500 2000"
   },
+  "prisma": {
+  "schema": "prisma/schema.prisma"
+},
   "dependencies": {
     "@prisma/client": "^5.7.0",
     "bcryptjs": "^2.4.3",
