@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  slug          String         @unique
+  avatarUrl     String?
+  bio           String?
+  role          Role           @default(WRITER)
+  passwordHash  String?
+  googleId      String?        @unique
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  images        Image[]
+  posts         Post[]
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@index([slug])
+  @@index([googleId])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id             String         @id @default(uuid())
+  name           String         @unique
+  slug           String         @unique
+  description    String?
+  metaTitle      String?
+  metaDesc       String?
+  ogImage        String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  postCategories PostCategory[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Post {
+  id             String         @id @default(uuid())
+  title          String
+  slug           String         @unique
+  excerpt        String?
+  content        String
+  status         PostStatus     @default(DRAFT)
+  authorId       String
+  metaTitle      String?
+  metaDesc       String?
+  canonicalUrl   String?
+  ogTitle        String?
+  ogDesc         String?
+  ogImage        String?
+  twitterTitle   String?
+  twitterDesc    String?
+  twitterImage   String?
+  schemaType     String?        @default("Article")
+  publishedAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  viewCount      Int            @default(0)
+  readingTimeMin Int?
+  images         Image[]
+  postCategories PostCategory[]
+  author         User           @relation(fields: [authorId], references: [id])
+
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@index([status, publishedAt])
+  @@index([viewCount])
+  @@map("posts")
+}
+
+model PostCategory {
+  postId     String
+  categoryId String
+  assignedAt DateTime @default(now())
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+  @@index([postId])
+  @@index([categoryId])
+  @@map("post_categories")
+}
+
+model Image {
+  id           String    @id @default(uuid())
+  url          String
+  publicId     String    @unique
+  altText      String?
+  caption      String?
+  type         ImageType @default(INLINE)
+  width        Int?
+  height       Int?
+  sizeBytes    Int?
+  mimeType     String?
+  postId       String?
+  uploadedById String
+  createdAt    DateTime  @default(now())
+  post         Post?     @relation(fields: [postId], references: [id])
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+
+  @@index([postId])
+  @@index([uploadedById])
+  @@index([type])
+  @@map("images")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  WRITER
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ImageType {
+  FEATURED
+  INLINE
+  AVATAR
+  OG_IMAGE
+}
